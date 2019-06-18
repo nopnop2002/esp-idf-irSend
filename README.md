@@ -30,6 +30,7 @@ You can obtain only NEC format IR code using this example.
 You can't obtain other format IR code.   
 
 If you can't obtain any IR code, you have to increase this value in infrared_nec_main.c.   
+My recommendation is 100.   
 ```
 #define NEC_BIT_MARGIN         20
 ```

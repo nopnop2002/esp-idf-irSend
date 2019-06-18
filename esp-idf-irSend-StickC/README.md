@@ -1,3 +1,16 @@
+# How to build
+
+```
+git clone https://github.com/nopnop2002/esp-idf-irSend
+cd esp-idf-irSend/esp-idf-irSend-StickC/
+make menuconfig
+make flash
+```
+
+\*There is no MENU ITEM where this application is peculiar.   
+
+---
+
 # How to use
 
 Select IR code by ButtonB (Side Button) press.   

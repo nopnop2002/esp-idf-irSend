@@ -34,8 +34,8 @@
 #include "ir_nec.h"
 
 #if CONFIG_STACK
-#define SCREEN_WIDTH	240
-#define SCREEN_HEIGHT	320
+#define SCREEN_WIDTH	320
+#define SCREEN_HEIGHT	240
 #define CS_GPIO		14
 #define DC_GPIO		27
 #define RESET_GPIO	33
@@ -121,26 +121,17 @@ void buttonStick(void *pvParameters)
 		if (level == 0) {
 			ESP_LOGI(pcTaskGetTaskName(0), "Push Button");
 			cmdBuf.command = CMD_DOWN;
+			TickType_t startTick = xTaskGetTickCount();
 			while(1) {
 				level = gpio_get_level(GPIO_INPUT);
 				if (level == 1) break;
 				vTaskDelay(1);
 			}
-			
-			for(int i=0;i<10;i++) {
-				level = gpio_get_level(GPIO_INPUT);
-				if (level == 0) {
-					cmdBuf.command = CMD_DOWN;
-					ESP_LOGI(pcTaskGetTaskName(0), "Push Push Button");
-					while(1) {
-						level = gpio_get_level(GPIO_INPUT);
-						if (level == 1) break;
-						vTaskDelay(1);
-					}
-				}
-				vTaskDelay(1);
-			}
-			ESP_LOGI(pcTaskGetTaskName(0),"cmdBuf.command=%d",cmdBuf.command);
+			TickType_t endTick = xTaskGetTickCount();
+			TickType_t diffTick = endTick-startTick;
+			ESP_LOGI(pcTaskGetTaskName(0),"diffTick=%d",diffTick);
+			cmdBuf.command = CMD_DOWN;
+			if (diffTick > 200) cmdBuf.command = CMD_SELECT;
 			xQueueSend(xQueueCmd, &cmdBuf, 0);
 		}
 		vTaskDelay(1);
@@ -243,7 +234,7 @@ static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
 
 #if 1
 	int readLine = 0;
-	ESP_LOGI(pcTaskGetTaskName(0), "Reading file");
+	ESP_LOGI(pcTaskGetTaskName(0), "Reading file:maxText=%d",maxText);
 	FILE* f = fopen("/spiffs/Display.def", "r");
 	if (f == NULL) {
 	    ESP_LOGE(pcTaskGetTaskName(0), "Failed to open define file for reading");
@@ -258,10 +249,9 @@ static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
 		if (pos) {
 			*pos = '\0';
 		}
-	    ESP_LOGI(pcTaskGetTaskName(0), "line=[%s]", line);
+		ESP_LOGI(pcTaskGetTaskName(0), "line=[%s]", line);
 		if (strlen(line) == 0) continue;
 		if (line[0] == '#') continue;
-		ESP_LOGI(pcTaskGetTaskName(0), "Read from file: [%s]", line);
 		// %s is divided automatically by a space character in scanf.
 		// convert comma to space
 		for(int index=0; index<strlen(line); index++) {
@@ -272,6 +262,7 @@ static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
 			if (line[index] == ' ') break;
 			if (index >= maxText) line[index] = ' ';
 		}
+		ESP_LOGI(pcTaskGetTaskName(0), "edited line=[%s]", line);
 		uint32_t cmd;
 		uint32_t addr;
 		sscanf(line, "%s %x %x",display[readLine].display_text, &cmd, &addr);
@@ -430,15 +421,15 @@ void tft(void *pvParameters)
 
 #if CONFIG_STICK
 void buzzerON(void) {
-        gpio_pad_select_gpio( GPIO_BUZZER );
-        gpio_set_direction( GPIO_BUZZER, GPIO_MODE_OUTPUT );
-        gpio_set_level( GPIO_BUZZER, 0 );
-        for(int i=0;i<50;i++){
-                gpio_set_level( GPIO_BUZZER, 1 );
-                vTaskDelay(1);
-                gpio_set_level( GPIO_BUZZER, 0 );
-                vTaskDelay(1);
-        }
+	gpio_pad_select_gpio( GPIO_BUZZER );
+	gpio_set_direction( GPIO_BUZZER, GPIO_MODE_OUTPUT );
+	gpio_set_level( GPIO_BUZZER, 0 );
+	for(int i=0;i<50;i++){
+		gpio_set_level( GPIO_BUZZER, 1 );
+		vTaskDelay(1);
+		gpio_set_level( GPIO_BUZZER, 0 );
+		vTaskDelay(1);
+	}
 }
 
 void tft(void *pvParameters)
@@ -479,14 +470,15 @@ void tft(void *pvParameters)
 	strcpy(ascii, "M5 Stick");
 	display_text(&dev, 0, ascii, 8, false);
 
-        for(int i=0;i<readLine;i++) {
-                strcpy(ascii, display[i].display_text);
-                ypos = i + 2;
-                if (i == 0) {                                                                                                 display_text(&dev, ypos, ascii, strlen(ascii), true);
-                } else {
-                        display_text(&dev, ypos, ascii, strlen(ascii), false);
-                }
-        } // end for
+	for(int i=0;i<readLine;i++) {
+		strcpy(ascii, display[i].display_text);
+		ypos = i + 2;
+		if (i == 0) {
+			display_text(&dev, ypos, ascii, strlen(ascii), true);
+		} else {
+			display_text(&dev, ypos, ascii, strlen(ascii), false);
+		}
+	} // end for
 
 	int selected = 0;
 	CMD_t cmdBuf;
@@ -494,15 +486,15 @@ void tft(void *pvParameters)
 		xQueueReceive(xQueueCmd, &cmdBuf, portMAX_DELAY);
 		ESP_LOGI(pcTaskGetTaskName(0),"cmdBuf.command=%d", cmdBuf.command);
 		if (cmdBuf.command == CMD_DOWN) {
-                        strcpy(ascii, display[selected].display_text);
-                        ypos = selected + 2;
-                        display_text(&dev, ypos, ascii, strlen(ascii), false);
+			strcpy(ascii, display[selected].display_text);
+			ypos = selected + 2;
+			display_text(&dev, ypos, ascii, strlen(ascii), false);
 
-                        selected++;
-                        if (selected == readLine) selected = 0;
-                        strcpy(ascii, display[selected].display_text);
-                        ypos = selected + 2;
-                        display_text(&dev, ypos, ascii, strlen(ascii), true);
+			selected++;
+			if (selected == readLine) selected = 0;
+			strcpy(ascii, display[selected].display_text);
+			ypos = selected + 2;
+			display_text(&dev, ypos, ascii, strlen(ascii), true);
 
 		} else if (cmdBuf.command == CMD_SELECT) {
 			//To build a series of waveforms.
@@ -516,6 +508,7 @@ void tft(void *pvParameters)
 				rmt_write_items(channel, item, NEC_DATA_ITEM_NUM, true);
 				//Wait until sending is done.
 				rmt_wait_tx_done(channel, portMAX_DELAY);
+				buzzerON();
 			}
 
 		}

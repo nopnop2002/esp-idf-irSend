@@ -11,10 +11,6 @@
 #include "esp_vfs.h"
 #include "esp_spiffs.h"
 
-//#include "axp192.h"
-//#include "st7735s.h"
-//#include "fontx.h"
-
 #define CONFIG_STACK	0
 #define CONFIG_STICKC	0
 #define CONFIG_STICK	1
@@ -38,8 +34,8 @@
 #include "ir_nec.h"
 
 #if CONFIG_STACK
-#define SCREEN_WIDTH	240
-#define SCREEN_HEIGHT	320
+#define SCREEN_WIDTH	320
+#define SCREEN_HEIGHT	240
 #define CS_GPIO		14
 #define DC_GPIO		27
 #define RESET_GPIO	33
@@ -72,7 +68,7 @@
 #define MAX_LINE	14
 #define DISPLAY_LENGTH	8
 #define GPIO_INPUT	GPIO_NUM_35
-#define GPIO_BUZZER     GPIO_NUM_26
+#define GPIO_BUZZER	GPIO_NUM_26
 #define RMT_TX_CHANNEL	1			/*!< RMT channel for transmitter */
 #define RMT_TX_GPIO_NUM	GPIO_NUM_17		/*!< GPIO number for transmitter signal */
 #endif
@@ -238,7 +234,7 @@ static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
 
 #if 1
 	int readLine = 0;
-	ESP_LOGI(pcTaskGetTaskName(0), "Reading file");
+	ESP_LOGI(pcTaskGetTaskName(0), "Reading file:maxText=%d",maxText);
 	FILE* f = fopen("/spiffs/Display.def", "r");
 	if (f == NULL) {
 	    ESP_LOGE(pcTaskGetTaskName(0), "Failed to open define file for reading");
@@ -253,10 +249,9 @@ static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
 		if (pos) {
 			*pos = '\0';
 		}
-	    ESP_LOGI(pcTaskGetTaskName(0), "line=[%s]", line);
+		ESP_LOGI(pcTaskGetTaskName(0), "line=[%s]", line);
 		if (strlen(line) == 0) continue;
 		if (line[0] == '#') continue;
-		ESP_LOGI(pcTaskGetTaskName(0), "Read from file: [%s]", line);
 		// %s is divided automatically by a space character in scanf.
 		// convert comma to space
 		for(int index=0; index<strlen(line); index++) {
@@ -267,6 +262,7 @@ static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
 			if (line[index] == ' ') break;
 			if (index >= maxText) line[index] = ' ';
 		}
+		ESP_LOGI(pcTaskGetTaskName(0), "edited line=[%s]", line);
 		uint32_t cmd;
 		uint32_t addr;
 		sscanf(line, "%s %x %x",display[readLine].display_text, &cmd, &addr);

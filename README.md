@@ -54,7 +54,7 @@ Prev,0x08,0x00 // cmd:0xf708 addr:0xff00
 ```
 
 **Note:**   
-**It isn't possible to include a comma and space character in Text.**   
+**It isn't possible to include a comma and space character in Text field.**   
 
 ---
 

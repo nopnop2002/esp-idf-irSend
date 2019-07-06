@@ -42,6 +42,7 @@
 #define BL_GPIO		32
 #define FONT_WIDTH	12
 #define FONT_HEIGHT	24
+#define MAX_CONFIG      20
 #define MAX_LINE	8
 #define DISPLAY_LENGTH	26
 #define GPIO_INPUT_A	GPIO_NUM_39
@@ -56,6 +57,7 @@
 #define SCREEN_HEIGHT	160
 #define FONT_WIDTH	8
 #define FONT_HEIGHT	16
+#define MAX_CONFIG      20
 #define MAX_LINE	8
 #define DISPLAY_LENGTH	10
 #define GPIO_INPUT_A	GPIO_NUM_37
@@ -65,6 +67,7 @@
 #endif
 
 #if CONFIG_STICK
+#define MAX_CONFIG      14
 #define MAX_LINE	14
 #define DISPLAY_LENGTH	8
 #define GPIO_INPUT	GPIO_NUM_35
@@ -74,9 +77,10 @@
 #endif
 
 
-#define CMD_UP			100
-#define CMD_DOWN		150
-#define CMD_SELECT		200
+#define CMD_UP		100
+#define CMD_DOWN	200
+#define CMD_TOP         300
+#define CMD_SELECT	400
 
 QueueHandle_t xQueueCmd;
 
@@ -88,6 +92,7 @@ typedef struct {
 } CMD_t;
 
 typedef struct {
+	bool enable;
 	char display_text[DISPLAY_LENGTH+1];
 	uint16_t ir_cmd;
 	uint16_t ir_addr;
@@ -120,7 +125,6 @@ void buttonStick(void *pvParameters)
 		int level = gpio_get_level(GPIO_INPUT);
 		if (level == 0) {
 			ESP_LOGI(pcTaskGetTaskName(0), "Push Button");
-			cmdBuf.command = CMD_DOWN;
 			TickType_t startTick = xTaskGetTickCount();
 			while(1) {
 				level = gpio_get_level(GPIO_INPUT);
@@ -165,8 +169,43 @@ void buttonA(void *pvParameters)
 		vTaskDelay(1);
 	}
 }
+#endif
 
+#if CONFIG_STICKC
+void buttonB(void *pvParameters)
+{
+	ESP_LOGI(pcTaskGetTaskName(0), "Start");
+	CMD_t cmdBuf;
+	cmdBuf.taskHandle = xTaskGetCurrentTaskHandle();
 
+	// set the GPIO as a input
+	gpio_pad_select_gpio(GPIO_INPUT_B);
+	gpio_set_direction(GPIO_INPUT_B, GPIO_MODE_DEF_INPUT);
+
+	while(1) {
+		int level = gpio_get_level(GPIO_INPUT_B);
+		if (level == 0) {
+			ESP_LOGI(pcTaskGetTaskName(0), "Push Button");
+			cmdBuf.command = CMD_DOWN;
+			TickType_t startTick = xTaskGetTickCount();
+			while(1) {
+				level = gpio_get_level(GPIO_INPUT_B);
+				if (level == 1) break;
+				vTaskDelay(1);
+			}
+			TickType_t endTick = xTaskGetTickCount();
+			TickType_t diffTick = endTick-startTick;
+			ESP_LOGI(pcTaskGetTaskName(0),"diffTick=%d",diffTick);
+			cmdBuf.command = CMD_DOWN;
+			if (diffTick > 200) cmdBuf.command = CMD_TOP;
+			xQueueSend(xQueueCmd, &cmdBuf, 0);
+		}
+		vTaskDelay(1);
+	}
+}
+#endif
+
+#if CONFIG_STACK
 void buttonB(void *pvParameters)
 {
 	ESP_LOGI(pcTaskGetTaskName(0), "Start");
@@ -274,16 +313,6 @@ static int parseLine(char *line, int size1, int size2, char arr[size1][size2])
 
 
 static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
-#if 0
-	for(int i=0;i<MAX_LINE;i++) {
-		sprintf(display[i].display_text,"Line %d",i);
-		display[i].ir_cmd = 0xE7;
-		display[i].ir_addr = 0xFF;
-	}
-	return MAX_LINE;
-#endif
-
-#if 1
 	int readLine = 0;
 	ESP_LOGI(pcTaskGetTaskName(0), "Reading file:maxText=%d",maxText);
 	FILE* f = fopen("/spiffs/Display.def", "r");
@@ -327,6 +356,7 @@ static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
 		int ret = parseLine(line, 10, 32, result);
 		ESP_LOGI(TAG, "parseLine=%d", ret);
 		for(int i=0;i<ret;i++) ESP_LOGI(TAG, "result[%d]=[%s]", i, &result[i][0]);
+		display[readLine].enable = true;
 		strlcpy(display[readLine].display_text, &result[0][0], maxText);
 		display[readLine].ir_cmd = strtol(&result[1][0], NULL, 16);
 		display[readLine].ir_addr = strtol(&result[2][0], NULL, 16);
@@ -336,10 +366,6 @@ static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
 	}
 	fclose(f);
 	return readLine;
-#endif
-
-
-
 }
 
 #if CONFIG_STICKC || CONFIG_STACK
@@ -385,8 +411,10 @@ void tft(void *pvParameters)
 	ESP_LOGI(pcTaskGetTaskName(0), "Setup Screen done");
 
 	// Read display information
-	DISPLAY_t display[MAX_LINE];
-	int readLine = readDefineFile(display, MAX_LINE, DISPLAY_LENGTH);
+	DISPLAY_t display[MAX_CONFIG];
+	for(int i=0;i<MAX_CONFIG;i++) display[i].enable = false;
+	int readLine = readDefineFile(display, MAX_CONFIG, DISPLAY_LENGTH);
+	ESP_LOGI(pcTaskGetTaskName(0), "readLine=%d",readLine);
 	if (readLine == 0) {
 		while(1) { vTaskDelay(1); }
 	}
@@ -410,16 +438,17 @@ void tft(void *pvParameters)
 #if CONFIG_STACK
 	strcpy((char *)ascii, "M5 Stack");
 #endif
-
 	lcdDrawString(&dev, fxG, 0, ypos, ascii, color);
 
-	for(int i=0;i<readLine;i++) {
+	int offset = 0;
+	for(int i=0;i<MAX_LINE;i++) {
 		ypos = FONT_HEIGHT * (i+3) - 1;
-		strcpy((char *)ascii, display[i].display_text);
+		ascii[0] = 0;
+		if (display[i+offset].enable) strcpy((char *)ascii, display[i+offset].display_text);
 		if (i == 0) {
-			lcdDrawString(&dev, fxG, 0, ypos, ascii, YELLOW);
+			lcdDrawString(&dev, fxM, 0, ypos, ascii, YELLOW);
 		} else {
-			lcdDrawString(&dev, fxM, 0, ypos, ascii, CYAN);
+			lcdDrawString(&dev, fxG, 0, ypos, ascii, CYAN);
 		}
 	} // end while
 
@@ -429,37 +458,79 @@ void tft(void *pvParameters)
 		xQueueReceive(xQueueCmd, &cmdBuf, portMAX_DELAY);
 		ESP_LOGI(pcTaskGetTaskName(0),"cmdBuf.command=%d", cmdBuf.command);
 		if (cmdBuf.command == CMD_DOWN) {
-			ypos = FONT_HEIGHT * (selected+3) - 1;
-			strcpy((char *)ascii, display[selected].display_text);
-			lcdDrawString(&dev, fxM, 0, ypos, ascii, BLACK);
-			lcdDrawString(&dev, fxM, 0, ypos, ascii, CYAN);
+			ESP_LOGI(pcTaskGetTaskName(0), "selected=%d offset=%d readLine=%d",selected, offset, readLine);
+			if ((selected+offset+1) == readLine) continue;
 
-			selected++;
-			if (selected == readLine) selected = 0;
 			ypos = FONT_HEIGHT * (selected+3) - 1;
-			strcpy((char *)ascii, display[selected].display_text);
+			strcpy((char *)ascii, display[selected+offset].display_text);
 			lcdDrawString(&dev, fxM, 0, ypos, ascii, BLACK);
-			lcdDrawString(&dev, fxG, 0, ypos, ascii, YELLOW);
+			lcdDrawString(&dev, fxG, 0, ypos, ascii, CYAN);
+
+			if (selected+1 == MAX_LINE) {
+				lcdDrawFillRect(&dev, 0, FONT_HEIGHT-1, SCREEN_WIDTH-1, SCREEN_HEIGHT-1, BLACK);
+				offset++;
+				for(int i=0;i<MAX_LINE;i++) {
+					ypos = FONT_HEIGHT * (i+3) - 1;
+					ascii[0] = 0;
+					if (display[i+offset].enable) strcpy((char *)ascii, display[i+offset].display_text);
+					lcdDrawString(&dev, fxG, 0, ypos, ascii, CYAN);
+				} // end while
+			} else {
+				selected++;
+			}
+			ypos = FONT_HEIGHT * (selected+3) - 1;
+			strcpy((char *)ascii, display[selected+offset].display_text);
+			lcdDrawString(&dev, fxG, 0, ypos, ascii, BLACK);
+			lcdDrawString(&dev, fxM, 0, ypos, ascii, YELLOW);
 
 		} else if (cmdBuf.command == CMD_UP) {
-			ypos = FONT_HEIGHT * (selected+3) - 1;
-			strcpy((char *)ascii, display[selected].display_text);
-			lcdDrawString(&dev, fxM, 0, ypos, ascii, BLACK);
-			lcdDrawString(&dev, fxM, 0, ypos, ascii, CYAN);
+			ESP_LOGI(pcTaskGetTaskName(0), "selected=%d offset=%d",selected, offset);
+			if (selected+offset == 0) continue;
 
-			selected--;
-			if (selected < 0) selected = 0;
 			ypos = FONT_HEIGHT * (selected+3) - 1;
-			strcpy((char *)ascii, display[selected].display_text);
+			strcpy((char *)ascii, display[selected+offset].display_text);
 			lcdDrawString(&dev, fxM, 0, ypos, ascii, BLACK);
-			lcdDrawString(&dev, fxG, 0, ypos, ascii, YELLOW);
+			lcdDrawString(&dev, fxG, 0, ypos, ascii, CYAN);
+
+			if (offset > 0) {
+				lcdDrawFillRect(&dev, 0, FONT_HEIGHT-1, SCREEN_WIDTH-1, SCREEN_HEIGHT-1, BLACK);
+				offset--;
+				for(int i=0;i<MAX_LINE;i++) {
+					ypos = FONT_HEIGHT * (i+3) - 1;
+					ascii[0] = 0;
+					if (display[i+offset].enable) strcpy((char *)ascii, display[i+offset].display_text);
+					lcdDrawString(&dev, fxG, 0, ypos, ascii, CYAN);
+				} // end while
+			} else {
+				selected--;
+			}
+			ypos = FONT_HEIGHT * (selected+3) - 1;
+			strcpy((char *)ascii, display[selected+offset].display_text);
+			lcdDrawString(&dev, fxG, 0, ypos, ascii, BLACK);
+			lcdDrawString(&dev, fxM, 0, ypos, ascii, YELLOW);
+
+		} else if (cmdBuf.command == CMD_TOP) {
+			offset = 0;
+			selected = 0;
+			lcdDrawFillRect(&dev, 0, FONT_HEIGHT-1, SCREEN_WIDTH-1, SCREEN_HEIGHT-1, BLACK);
+			for(int i=0;i<MAX_LINE;i++) {
+				ypos = FONT_HEIGHT * (i+3) - 1;
+				ascii[0] = 0;
+				if (display[i+offset].enable) strcpy((char *)ascii, display[i+offset].display_text);
+				if (i == 0) {
+					lcdDrawString(&dev, fxM, 0, ypos, ascii, YELLOW);
+				} else {
+					lcdDrawString(&dev, fxG, 0, ypos, ascii, CYAN);
+				}
+			} // end while
 
 		} else if (cmdBuf.command == CMD_SELECT) {
+			ESP_LOGI(pcTaskGetTaskName(0), "selected=%d offset=%d",selected, offset);
 			//To build a series of waveforms.
-			ESP_LOGI(pcTaskGetTaskName(0), "ir_cmd=0x%x",display[selected].ir_cmd);
-			ESP_LOGI(pcTaskGetTaskName(0), "ir_addr=0x%x",display[selected].ir_addr);
-			uint16_t cmd = display[selected].ir_cmd;
-			uint16_t addr = display[selected].ir_addr;;
+			ESP_LOGI(pcTaskGetTaskName(0), "ir_cmd=0x%x",display[selected+offset].ir_cmd);
+			ESP_LOGI(pcTaskGetTaskName(0), "ir_addr=0x%x",display[selected+offset].ir_addr);
+			uint16_t cmd = display[selected+offset].ir_cmd;
+			uint16_t addr = display[selected+offset].ir_addr;;
 			int ret = nec_build_items(channel, item, ((~addr) << 8) | addr, ((~cmd) << 8) |  cmd);
 			ESP_LOGI(pcTaskGetTaskName(0), "nec_build_items ret=%d",ret);
 			if (ret != NEC_DATA_ITEM_NUM) {
@@ -515,8 +586,9 @@ void tft(void *pvParameters)
 	ESP_LOGI(pcTaskGetTaskName(0), "Setup Screen done");
 
 	// Read display information
-	DISPLAY_t display[MAX_LINE];
-	int readLine = readDefineFile(display, MAX_LINE, DISPLAY_LENGTH);
+	DISPLAY_t display[MAX_CONFIG];
+	for(int i=0;i<MAX_CONFIG;i++) display[i].enable = false;
+	int readLine = readDefineFile(display, MAX_CONFIG, DISPLAY_LENGTH);
 	if (readLine == 0) {
 		while(1) { vTaskDelay(1); }
 	}
@@ -534,9 +606,10 @@ void tft(void *pvParameters)
 	strcpy(ascii, "M5 Stick");
 	display_text(&dev, 0, ascii, 8, false);
 
-	for(int i=0;i<readLine;i++) {
-		strcpy(ascii, display[i].display_text);
+	for(int i=0;i<MAX_LINE;i++) {
 		ypos = i + 2;
+		ascii[0] = 0;
+		if (display[i].enable) strcpy(ascii, display[i].display_text);
 		if (i == 0) {
 			display_text(&dev, ypos, ascii, strlen(ascii), true);
 		} else {

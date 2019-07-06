@@ -46,15 +46,15 @@ After which, Build this project and flash it to board.
 example of Display.def.   
 ```
 #This is define file for isp-idf-irSend
-#Text,cmd,addr
-Play,0x18,0x00 // cmd:0xe718 addr:0xff00
-Stop,0x1C,0x00 // cmd:0xe31c addr:0xff00
-Next,0x5A,0x00 // cmd:0xa55a addr:0xff00
-Prev,0x08,0x00 // cmd:0xf708 addr:0xff00
+#Text,cmd,addr;
+Play,0x18,0x00; cmd:0xe718 addr:0xff00
+Stop,0x1C,0x00; cmd:0xe31c addr:0xff00
+Next,0x5A,0x00; cmd:0xa55a addr:0xff00
+Prev,0x08,0x00; cmd:0xf708 addr:0xff00
 ```
 
 **Note:**   
-**It isn't possible to include a comma and space character in Text field.**   
+**Each line terminated by semicolon.
 
 ---
 

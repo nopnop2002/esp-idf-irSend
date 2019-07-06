@@ -222,6 +222,57 @@ void buttonC(void *pvParameters)
 }
 #endif
 
+static int parseLine(char *line, int size1, int size2, char arr[size1][size2])
+{
+	ESP_LOGD(TAG, "line=[%s]", line);
+	int dst = 0;
+	int pos = 0;
+	int llen = strlen(line);
+	bool inq = false;
+
+	for(int src=0;src<llen;src++) {
+		char c = line[src];
+		ESP_LOGD(TAG, "src=%d c=%c", src, c);
+		if (c == ',') {
+			if (inq) {
+				if (pos == (size2-1)) continue;
+				arr[dst][pos++] = line[src];
+				arr[dst][pos] = 0;
+			} else {
+				ESP_LOGD(TAG, "arr[%d]=[%s]",dst,arr[dst]);
+				dst++;
+				if (dst == size1) break;
+				pos = 0;
+			}
+
+		} else if (c == ';') {
+			if (inq) {
+				if (pos == (size2-1)) continue;
+				arr[dst][pos++] = line[src];
+				arr[dst][pos] = 0;
+			} else {
+				ESP_LOGD(TAG, "arr[%d]=[%s]",dst,arr[dst]);
+				dst++;
+				break;
+			}
+
+		} else if (c == '"') {
+			inq = !inq;
+
+		} else if (c == '\'') {
+			inq = !inq;
+
+		} else {
+			if (pos == (size2-1)) continue;
+			arr[dst][pos++] = line[src];
+			arr[dst][pos] = 0;
+		}
+	}
+
+	return dst;
+}
+
+
 static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
 #if 0
 	for(int i=0;i<MAX_LINE;i++) {
@@ -242,6 +293,7 @@ static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
 	    return 0;
 	}
 	char line[64];
+	char result[10][32];
 	while (1){
 		if ( fgets(line, sizeof(line) ,f) == 0 ) break;
 		// strip newline
@@ -252,6 +304,8 @@ static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
 		ESP_LOGI(pcTaskGetTaskName(0), "line=[%s]", line);
 		if (strlen(line) == 0) continue;
 		if (line[0] == '#') continue;
+
+#if 0
 		// %s is divided automatically by a space character in scanf.
 		// convert comma to space
 		for(int index=0; index<strlen(line); index++) {
@@ -268,6 +322,15 @@ static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
 		sscanf(line, "%s %x %x",display[readLine].display_text, &cmd, &addr);
 		display[readLine].ir_cmd = cmd;
 		display[readLine].ir_addr = addr;
+#endif
+
+		int ret = parseLine(line, 10, 32, result);
+		ESP_LOGI(TAG, "parseLine=%d", ret);
+		for(int i=0;i<ret;i++) ESP_LOGI(TAG, "result[%d]=[%s]", i, &result[i][0]);
+		strlcpy(display[readLine].display_text, &result[0][0], maxText);
+		display[readLine].ir_cmd = strtol(&result[1][0], NULL, 16);
+		display[readLine].ir_addr = strtol(&result[2][0], NULL, 16);
+
 		readLine++;
 		if (readLine == maxLine) break;
 	}

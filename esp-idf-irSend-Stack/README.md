@@ -24,4 +24,4 @@ make flash
 Select IR code by ButtonB/C (Center/Right Button) press.   
 Fire IR code by ButtonA (Left Button) press.   
 
-![Stack-2](https://user-images.githubusercontent.com/6020549/59958245-574faa00-94de-11e9-94ce-f9099b53eea9.JPG)
+![Stack-2](https://user-images.githubusercontent.com/6020549/60749723-dfeb4180-9fd8-11e9-828f-8b58d1c9fc59.JPG)

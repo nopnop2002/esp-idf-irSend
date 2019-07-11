@@ -5,9 +5,7 @@ You can use these as Remote control transmitter.
 ---
 
 # How to obtain IR code.
-You can obtain IR code using esp-idf example.   
-
-https://github.com/espressif/esp-idf/tree/master/examples/peripherals/rmt_nec_tx_rx
+You can obtain IR code using [this](https://github.com/espressif/esp-idf/tree/master/examples/peripherals/rmt_nec_tx_rx) esp-idf example.   
 
 To disable self-test mode, comment out RMT_RX_SELF_TEST in infrared_nec_main.c.   
 After which, you need to connect a IR receiver to GPIO19.   

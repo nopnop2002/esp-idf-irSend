@@ -4,16 +4,12 @@ You can use these as Remote control transmitter.
 
 ---
 
-# How to obtain IR code.
-You can obtain IR code using [this](https://github.com/espressif/esp-idf/tree/master/examples/peripherals/rmt_nec_tx_rx) esp-idf example.   
+# How to get IR code.
+You can get IR code using [this](https://github.com/espressif/esp-idf/tree/master/examples/peripherals/rmt/ir_protocols) example.   
 
-To disable self-test mode, comment out RMT_RX_SELF_TEST in infrared_nec_main.c.   
-After which, you need to connect a IR receiver to GPIO19.   
+You need to connect a IR receiver to GPIO19.   
 IR transmitter don't use.   
-If you want to change GPIO19, you can use any GPIO.   
-```
-#define RMT_RX_GPIO_NUM  19     /*!< GPIO number for receiver */
-```
+When changing GPIO19, you can change it to any GPIO using menuconfig.   
 
 Build the project and flash it to the board, then run monitor tool to view serial output.   
 When you press a button of the remote control, you will find there output:   

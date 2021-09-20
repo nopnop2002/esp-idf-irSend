@@ -16,8 +16,11 @@ When you press a button of the remote control, you will find there output:
 ```
 I (3513574) NEC: RMT RCV --- addr: 0xff00 cmd: 0xe718
 ```
+addr and cmd is displayed as below:   
+addr: 0xff00 --> invert addr << 8 + addr   
+cmd: 0xe718 --> invert cmd << 8 + cmd   
 
-0x00 is addr, and 0x18 is cmd.
+addr is 0x00 , and cmd is 0x18.
 
 Note:   
 You can get only NEC and RC5 format IR code using this example.   
@@ -35,7 +38,7 @@ After which, Build this project and flash it to board.
 example of Display.def.   
 ```
 #This is define file for isp-idf-irSend
-#Text,cmd,addr;
+#Text,cmd,addr;comment
 Play,0x18,0x00; cmd:0xe718 addr:0xff00
 Stop,0x1C,0x00; cmd:0xe31c addr:0xff00
 Next,0x5A,0x00; cmd:0xa55a addr:0xff00
@@ -43,7 +46,7 @@ Prev,0x08,0x00; cmd:0xf708 addr:0xff00
 ```
 
 **Note:**   
-**Each line terminated by semicolon.
+Each line terminated by semicolon.
 
 ---
 

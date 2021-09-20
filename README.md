@@ -17,8 +17,8 @@ When you press a button of the remote control, you will find there output:
 I (3513574) NEC: RMT RCV --- addr: 0xff00 cmd: 0xe718
 ```
 addr and cmd is displayed as below:   
-addr: 0xff00 --> invert addr << 8 + addr   
-cmd: 0xe718 --> invert cmd << 8 + cmd   
+addr: 0xff00 --> {0xff-addr} << 8 + addr   
+cmd: 0xe718 --> {0xff-cmd} << 8 + cmd   
 
 addr is 0x00 , and cmd is 0x18.
 

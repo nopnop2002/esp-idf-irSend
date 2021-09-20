@@ -3,11 +3,14 @@
 ```
 git clone https://github.com/nopnop2002/esp-idf-irSend
 cd esp-idf-irSend/esp-idf-irSend-StickC/
-make menuconfig
-make flash
+idf.py set-target esp32
+idf.py menuconfig
+idf.py flash -b 115200 monitor
 ```
 
 \*There is no MENU ITEM where this application is peculiar.   
+
+__You need to specify Baud rate for flashing.__   
 
 ---
 

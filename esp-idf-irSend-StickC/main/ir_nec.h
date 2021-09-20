@@ -12,7 +12,9 @@
 //#define RMT_TX_GPIO_NUM  18     /*!< GPIO number for transmitter signal */
 //#define RMT_RX_CHANNEL    0     /*!< RMT channel for receiver */
 //#define RMT_RX_GPIO_NUM  19     /*!< GPIO number for receiver */
-#define RMT_CLK_DIV      100    /*!< RMT counter clock divider */
+
+//#define RMT_CLK_DIV      100    /*!< RMT counter clock divider */
+#define RMT_CLK_DIV      96     /*!< RMT counter clock divider */
 #define RMT_TICK_10_US    (80000000/RMT_CLK_DIV/100000)   /*!< RMT counter value for 10 us.(Source clock is APB clock) */
 
 #define NEC_HEADER_HIGH_US    9000                         /*!< NEC protocol header: positive 9ms */

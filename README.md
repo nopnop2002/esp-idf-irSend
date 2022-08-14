@@ -1,11 +1,21 @@
 # esp-idf-irSend
-M5Stick and M5StickC have internal IR Transmitter.   
+M5Stick and M5StickC(+) have internal IR Transmitter.   
 You can use these as Remote control transmitter.   
 
----
+# Software requirements
+esp-idf v4.4.   
+This is because the specifications of the RMT driver have changed significantly with ESP-IDF V5.   
 
 # How to get IR code.
-You can get IR code using [this](https://github.com/espressif/esp-idf/tree/master/examples/peripherals/rmt/ir_protocols) example.   
+You can get IR code using esp-idf-irAnalysis.   
+
+```
+git clone https://github.com/nopnop2002/esp-idf-irSend
+cd esp-idf-irSend/esp-idf-irAnalysis/
+idf.py set-target esp32
+idf.py menuconfig
+idf.py flash monitor
+```
 
 You need to connect a IR receiver to GPIO19.   
 IR transmitter don't use.   
@@ -22,12 +32,10 @@ cmd: 0xe718 --> {0xff-cmd} << 8 + cmd
 
 addr is 0x00 , and cmd is 0x18.
 
-Note:   
-You can get only NEC and RC5 format IR code using this example.   
+**Note:**   
+You can get only NEC format IR code using this.   
 You can't get other format IR code.   
 
-
----
 
 # Setup this project.
 You have to edit Display.def in font directory.   
@@ -48,7 +56,6 @@ Prev,0x08,0x00; cmd:0xf708 addr:0xff00
 **Note:**   
 Each line terminated by semicolon.
 
----
 
 # NEC IR Code Specification
 

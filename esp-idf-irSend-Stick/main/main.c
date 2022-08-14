@@ -210,7 +210,7 @@ void buttonA(void *pvParameters)
 }
 #endif
 
-#if CONFIG_STICKC || CONFIG_STICKC_PLUS || CONFIG_STICKC_PLUS
+#if CONFIG_STICKC || CONFIG_STICKC_PLUS
 void buttonB(void *pvParameters)
 {
 	ESP_LOGI(pcTaskGetTaskName(0), "Start");
@@ -242,7 +242,7 @@ void buttonB(void *pvParameters)
 		vTaskDelay(1);
 	}
 }
-#endif
+#endif // CONFIG_STICKC || CONFIG_STICKC_PLUS
 
 #if CONFIG_STACK
 void buttonB(void *pvParameters)
@@ -270,7 +270,7 @@ void buttonB(void *pvParameters)
 		vTaskDelay(1);
 	}
 }
-#endif
+#endif // CONFIG_STACK
 
 #if CONFIG_STACK
 void buttonC(void *pvParameters)
@@ -298,7 +298,7 @@ void buttonC(void *pvParameters)
 		vTaskDelay(1);
 	}
 }
-#endif
+#endif // CONFIG_STACK
 
 static int parseLine(char *line, int size1, int size2, char arr[size1][size2])
 {
@@ -408,16 +408,6 @@ void tft(void *pvParameters)
 #endif
 
 	// Setup IR transmitter
-#if 0
-	nec_tx_init(RMT_TX_CHANNEL, RMT_TX_GPIO_NUM);
-	int channel = RMT_TX_CHANNEL;
-	size_t size = sizeof(rmt_item32_t) * NEC_DATA_ITEM_NUM;
-	//each item represent a cycle of waveform.
-	rmt_item32_t* item = (rmt_item32_t*) malloc(size);
-	//int item_num = NEC_DATA_ITEM_NUM;
-	memset((void*) item, 0, size);
-#endif
-
 	rmt_item32_t *items = NULL;
 	size_t length = 0;
 	ir_builder_t *ir_builder = NULL;
@@ -620,15 +610,6 @@ void buzzerON(void) {
 void tft(void *pvParameters)
 {
 	// Setup IR transmitter
-#if 0
-	nec_tx_init(RMT_TX_CHANNEL, RMT_TX_GPIO_NUM);
-	int channel = RMT_TX_CHANNEL;
-	size_t size = sizeof(rmt_item32_t) * NEC_DATA_ITEM_NUM;
-	//each item represent a cycle of waveform.
-	rmt_item32_t* item = (rmt_item32_t*) malloc(size);
-	//int item_num = NEC_DATA_ITEM_NUM;
-	memset((void*) item, 0, size);
-#endif
 	rmt_item32_t *items = NULL;
 	size_t length = 0;
 	ir_builder_t *ir_builder = NULL;

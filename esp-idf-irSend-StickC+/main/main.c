@@ -152,7 +152,7 @@ static void SPIFFS_Directory(char * path) {
 #if CONFIG_STICK
 void buttonStick(void *pvParameters)
 {
-	ESP_LOGI(pcTaskGetTaskName(0), "Start");
+	ESP_LOGI(pcTaskGetName(0), "Start");
 	CMD_t cmdBuf;
 	cmdBuf.taskHandle = xTaskGetCurrentTaskHandle();
 
@@ -163,7 +163,7 @@ void buttonStick(void *pvParameters)
 	while(1) {
 		int level = gpio_get_level(GPIO_INPUT);
 		if (level == 0) {
-			ESP_LOGI(pcTaskGetTaskName(0), "Push Button");
+			ESP_LOGI(pcTaskGetName(0), "Push Button");
 			TickType_t startTick = xTaskGetTickCount();
 			while(1) {
 				level = gpio_get_level(GPIO_INPUT);
@@ -172,7 +172,7 @@ void buttonStick(void *pvParameters)
 			}
 			TickType_t endTick = xTaskGetTickCount();
 			TickType_t diffTick = endTick-startTick;
-			ESP_LOGI(pcTaskGetTaskName(0),"diffTick=%d",diffTick);
+			ESP_LOGI(pcTaskGetName(0),"diffTick=%d",diffTick);
 			cmdBuf.command = CMD_DOWN;
 			if (diffTick > 100) cmdBuf.command = CMD_SELECT;
 			xQueueSend(xQueueCmd, &cmdBuf, 0);
@@ -185,7 +185,7 @@ void buttonStick(void *pvParameters)
 #if CONFIG_STICKC || CONFIG_STICKC_PLUS || CONFIG_STACK
 void buttonA(void *pvParameters)
 {
-	ESP_LOGI(pcTaskGetTaskName(0), "Start");
+	ESP_LOGI(pcTaskGetName(0), "Start");
 	CMD_t cmdBuf;
 	cmdBuf.command = CMD_SELECT;
 	cmdBuf.taskHandle = xTaskGetCurrentTaskHandle();
@@ -197,7 +197,7 @@ void buttonA(void *pvParameters)
 	while(1) {
 		int level = gpio_get_level(GPIO_INPUT_A);
 		if (level == 0) {
-			ESP_LOGI(pcTaskGetTaskName(0), "Push Button");
+			ESP_LOGI(pcTaskGetName(0), "Push Button");
 			while(1) {
 				level = gpio_get_level(GPIO_INPUT_A);
 				if (level == 1) break;
@@ -213,7 +213,7 @@ void buttonA(void *pvParameters)
 #if CONFIG_STICKC || CONFIG_STICKC_PLUS
 void buttonB(void *pvParameters)
 {
-	ESP_LOGI(pcTaskGetTaskName(0), "Start");
+	ESP_LOGI(pcTaskGetName(0), "Start");
 	CMD_t cmdBuf;
 	cmdBuf.taskHandle = xTaskGetCurrentTaskHandle();
 
@@ -224,7 +224,7 @@ void buttonB(void *pvParameters)
 	while(1) {
 		int level = gpio_get_level(GPIO_INPUT_B);
 		if (level == 0) {
-			ESP_LOGI(pcTaskGetTaskName(0), "Push Button");
+			ESP_LOGI(pcTaskGetName(0), "Push Button");
 			cmdBuf.command = CMD_DOWN;
 			TickType_t startTick = xTaskGetTickCount();
 			while(1) {
@@ -234,7 +234,7 @@ void buttonB(void *pvParameters)
 			}
 			TickType_t endTick = xTaskGetTickCount();
 			TickType_t diffTick = endTick-startTick;
-			ESP_LOGI(pcTaskGetTaskName(0),"diffTick=%d",diffTick);
+			ESP_LOGI(pcTaskGetName(0),"diffTick=%d",diffTick);
 			cmdBuf.command = CMD_DOWN;
 			if (diffTick > 100) cmdBuf.command = CMD_TOP;
 			xQueueSend(xQueueCmd, &cmdBuf, 0);
@@ -247,7 +247,7 @@ void buttonB(void *pvParameters)
 #if CONFIG_STACK
 void buttonB(void *pvParameters)
 {
-	ESP_LOGI(pcTaskGetTaskName(0), "Start");
+	ESP_LOGI(pcTaskGetName(0), "Start");
 	CMD_t cmdBuf;
 	cmdBuf.command = CMD_DOWN;
 	cmdBuf.taskHandle = xTaskGetCurrentTaskHandle();
@@ -259,7 +259,7 @@ void buttonB(void *pvParameters)
 	while(1) {
 		int level = gpio_get_level(GPIO_INPUT_B);
 		if (level == 0) {
-			ESP_LOGI(pcTaskGetTaskName(0), "Push Button");
+			ESP_LOGI(pcTaskGetName(0), "Push Button");
 			while(1) {
 				level = gpio_get_level(GPIO_INPUT_B);
 				if (level == 1) break;
@@ -275,7 +275,7 @@ void buttonB(void *pvParameters)
 #if CONFIG_STACK
 void buttonC(void *pvParameters)
 {
-	ESP_LOGI(pcTaskGetTaskName(0), "Start");
+	ESP_LOGI(pcTaskGetName(0), "Start");
 	CMD_t cmdBuf;
 	cmdBuf.command = CMD_UP;
 	cmdBuf.taskHandle = xTaskGetCurrentTaskHandle();
@@ -287,7 +287,7 @@ void buttonC(void *pvParameters)
 	while(1) {
 		int level = gpio_get_level(GPIO_INPUT_C);
 		if (level == 0) {
-			ESP_LOGI(pcTaskGetTaskName(0), "Push Button");
+			ESP_LOGI(pcTaskGetName(0), "Push Button");
 			while(1) {
 				level = gpio_get_level(GPIO_INPUT_C);
 				if (level == 1) break;
@@ -353,11 +353,11 @@ static int parseLine(char *line, int size1, int size2, char arr[size1][size2])
 
 static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
 	int readLine = 0;
-	ESP_LOGI(pcTaskGetTaskName(0), "Reading file:maxText=%d",maxText);
+	ESP_LOGI(pcTaskGetName(0), "Reading file:maxText=%d",maxText);
 	FILE* f = fopen("/spiffs/Display.def", "r");
 	if (f == NULL) {
-			ESP_LOGE(pcTaskGetTaskName(0), "Failed to open define file for reading");
-			ESP_LOGE(pcTaskGetTaskName(0), "Please make Display.def");
+			ESP_LOGE(pcTaskGetName(0), "Failed to open define file for reading");
+			ESP_LOGE(pcTaskGetName(0), "Please make Display.def");
 			return 0;
 	}
 	char line[64];
@@ -369,7 +369,7 @@ static int readDefineFile(DISPLAY_t *display, size_t maxLine, size_t maxText) {
 		if (pos) {
 			*pos = '\0';
 		}
-		ESP_LOGI(pcTaskGetTaskName(0), "line=[%s]", line);
+		ESP_LOGI(pcTaskGetName(0), "line=[%s]", line);
 		if (strlen(line) == 0) continue;
 		if (line[0] == '#') continue;
 
@@ -418,7 +418,7 @@ void tft(void *pvParameters)
 	ir_builder_config_t ir_builder_config = IR_BUILDER_DEFAULT_CONFIG((ir_dev_t)RMT_TX_CHANNEL);
 	ir_builder_config.flags |= IR_TOOLS_FLAGS_PROTO_EXT;
 	ir_builder = ir_builder_rmt_new_nec(&ir_builder_config);
-	ESP_LOGI(pcTaskGetTaskName(0), "Setup IR transmitter done");
+	ESP_LOGI(pcTaskGetName(0), "Setup IR transmitter done");
 
 	// Setup Screen
 #if CONFIG_STICKC
@@ -438,20 +438,20 @@ void tft(void *pvParameters)
 	spi_master_init(&dev, CS_GPIO, DC_GPIO, RESET_GPIO, BL_GPIO);
 	lcdInit(&dev, 0x9341, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
 #endif
-	ESP_LOGI(pcTaskGetTaskName(0), "Setup Screen done");
+	ESP_LOGI(pcTaskGetName(0), "Setup Screen done");
 
 	// Read display information
 	DISPLAY_t display[MAX_CONFIG];
 	for(int i=0;i<MAX_CONFIG;i++) display[i].enable = false;
 	int readLine = readDefineFile(display, MAX_CONFIG, MAX_CHARACTER);
-	ESP_LOGI(pcTaskGetTaskName(0), "readLine=%d",readLine);
+	ESP_LOGI(pcTaskGetName(0), "readLine=%d",readLine);
 	if (readLine == 0) {
 		while(1) { vTaskDelay(1); }
 	}
 	for(int i=0;i<readLine;i++) {
-		ESP_LOGI(pcTaskGetTaskName(0), "display[%d].display_text=[%s]",i, display[i].display_text);
-		ESP_LOGI(pcTaskGetTaskName(0), "display[%d].ir_cmd=[0x%02x]",i, display[i].ir_cmd);
-		ESP_LOGI(pcTaskGetTaskName(0), "display[%d].ir_addr=[0x%02x]",i, display[i].ir_addr);
+		ESP_LOGI(pcTaskGetName(0), "display[%d].display_text=[%s]",i, display[i].display_text);
+		ESP_LOGI(pcTaskGetName(0), "display[%d].ir_cmd=[0x%02x]",i, display[i].ir_cmd);
+		ESP_LOGI(pcTaskGetName(0), "display[%d].ir_addr=[0x%02x]",i, display[i].ir_addr);
 	}
 
 	// Initial Screen
@@ -490,9 +490,9 @@ void tft(void *pvParameters)
 	CMD_t cmdBuf;
 	while(1) {
 		xQueueReceive(xQueueCmd, &cmdBuf, portMAX_DELAY);
-		ESP_LOGI(pcTaskGetTaskName(0),"cmdBuf.command=%d", cmdBuf.command);
+		ESP_LOGI(pcTaskGetName(0),"cmdBuf.command=%d", cmdBuf.command);
 		if (cmdBuf.command == CMD_DOWN) {
-			ESP_LOGI(pcTaskGetTaskName(0), "selected=%d offset=%d readLine=%d",selected, offset, readLine);
+			ESP_LOGI(pcTaskGetName(0), "selected=%d offset=%d readLine=%d",selected, offset, readLine);
 			if ((selected+offset+1) == readLine) continue;
 
 			ypos = FONT_HEIGHT * (selected+3) - 1;
@@ -520,7 +520,7 @@ void tft(void *pvParameters)
 			lcdDrawString(&dev, fxG, 0, ypos, ascii, YELLOW);
 
 		} else if (cmdBuf.command == CMD_UP) {
-			ESP_LOGI(pcTaskGetTaskName(0), "selected=%d offset=%d",selected, offset);
+			ESP_LOGI(pcTaskGetName(0), "selected=%d offset=%d",selected, offset);
 			if (selected+offset == 0) continue;
 
 			ypos = FONT_HEIGHT * (selected+3) - 1;
@@ -562,15 +562,15 @@ void tft(void *pvParameters)
 			}
 
 		} else if (cmdBuf.command == CMD_SELECT) {
-			ESP_LOGI(pcTaskGetTaskName(0), "selected=%d offset=%d",selected, offset);
-			ESP_LOGI(pcTaskGetTaskName(0), "ir_cmd=0x%02x",display[selected+offset].ir_cmd);
-			ESP_LOGI(pcTaskGetTaskName(0), "ir_addr=0x%02x",display[selected+offset].ir_addr);
+			ESP_LOGI(pcTaskGetName(0), "selected=%d offset=%d",selected, offset);
+			ESP_LOGI(pcTaskGetName(0), "ir_cmd=0x%02x",display[selected+offset].ir_cmd);
+			ESP_LOGI(pcTaskGetName(0), "ir_addr=0x%02x",display[selected+offset].ir_addr);
 			uint16_t cmd = display[selected+offset].ir_cmd;
 			uint16_t addr = display[selected+offset].ir_addr;;
 			cmd = ((~cmd) << 8) |  cmd; // Reverse cmd + cmd
 			addr = ((~addr) << 8) | addr; // Reverse addr + addr
-			ESP_LOGI(pcTaskGetTaskName(0), "cmd=0x%x",cmd);
-			ESP_LOGI(pcTaskGetTaskName(0), "addr=0x%x",addr);
+			ESP_LOGI(pcTaskGetName(0), "cmd=0x%x",cmd);
+			ESP_LOGI(pcTaskGetName(0), "addr=0x%x",addr);
 
 			// Send new key code
 			ESP_ERROR_CHECK(ir_builder->build_frame(ir_builder, addr, cmd));
@@ -620,13 +620,13 @@ void tft(void *pvParameters)
 	ir_builder_config_t ir_builder_config = IR_BUILDER_DEFAULT_CONFIG((ir_dev_t)RMT_TX_CHANNEL);
 	ir_builder_config.flags |= IR_TOOLS_FLAGS_PROTO_EXT;
 	ir_builder = ir_builder_rmt_new_nec(&ir_builder_config);
-	ESP_LOGI(pcTaskGetTaskName(0), "Setup IR transmitter done");
+	ESP_LOGI(pcTaskGetName(0), "Setup IR transmitter done");
 
 	// Setup Screen
 	SH1107_t dev;
 	spi_master_init(&dev);
 	spi_init(&dev, 64, 128);
-	ESP_LOGI(pcTaskGetTaskName(0), "Setup Screen done");
+	ESP_LOGI(pcTaskGetName(0), "Setup Screen done");
 
 	// Read display information
 	DISPLAY_t display[MAX_CONFIG];
@@ -636,9 +636,9 @@ void tft(void *pvParameters)
 		while(1) { vTaskDelay(1); }
 	}
 	for(int i=0;i<readLine;i++) {
-		ESP_LOGI(pcTaskGetTaskName(0), "display[%d].display_text=[%s]",i, display[i].display_text);
-		ESP_LOGI(pcTaskGetTaskName(0), "display[%d].ir_cmd=[0x%02x]",i, display[i].ir_cmd);
-		ESP_LOGI(pcTaskGetTaskName(0), "display[%d].ir_addr=[0x%02x]",i, display[i].ir_addr);
+		ESP_LOGI(pcTaskGetName(0), "display[%d].display_text=[%s]",i, display[i].display_text);
+		ESP_LOGI(pcTaskGetName(0), "display[%d].ir_cmd=[0x%02x]",i, display[i].ir_cmd);
+		ESP_LOGI(pcTaskGetName(0), "display[%d].ir_addr=[0x%02x]",i, display[i].ir_addr);
 	}
 
 	// Initial Screen
@@ -664,7 +664,7 @@ void tft(void *pvParameters)
 	CMD_t cmdBuf;
 	while(1) {
 		xQueueReceive(xQueueCmd, &cmdBuf, portMAX_DELAY);
-		ESP_LOGI(pcTaskGetTaskName(0),"cmdBuf.command=%d", cmdBuf.command);
+		ESP_LOGI(pcTaskGetName(0),"cmdBuf.command=%d", cmdBuf.command);
 		if (cmdBuf.command == CMD_DOWN) {
 			strcpy(ascii, display[selected].display_text);
 			ypos = selected + 2;
@@ -677,15 +677,15 @@ void tft(void *pvParameters)
 			display_text(&dev, ypos, ascii, strlen(ascii), true);
 
 		} else if (cmdBuf.command == CMD_SELECT) {
-			ESP_LOGI(pcTaskGetTaskName(0), "selected=%d",selected);
-			ESP_LOGI(pcTaskGetTaskName(0), "ir_cmd=0x%02x",display[selected].ir_cmd);
-			ESP_LOGI(pcTaskGetTaskName(0), "ir_addr=0x%02x",display[selected].ir_addr);
+			ESP_LOGI(pcTaskGetName(0), "selected=%d",selected);
+			ESP_LOGI(pcTaskGetName(0), "ir_cmd=0x%02x",display[selected].ir_cmd);
+			ESP_LOGI(pcTaskGetName(0), "ir_addr=0x%02x",display[selected].ir_addr);
 			uint16_t cmd = display[selected].ir_cmd;
 			uint16_t addr = display[selected].ir_addr;
 			cmd = ((~cmd) << 8) |  cmd; // Reverse cmd + cmd
 			addr = ((~addr) << 8) | addr; // Reverse addr + addr
-			ESP_LOGI(pcTaskGetTaskName(0), "cmd=0x%x",cmd);
-			ESP_LOGI(pcTaskGetTaskName(0), "addr=0x%x",addr);
+			ESP_LOGI(pcTaskGetName(0), "cmd=0x%x",cmd);
+			ESP_LOGI(pcTaskGetName(0), "addr=0x%x",addr);
 
 			// Send new key code
 			ESP_ERROR_CHECK(ir_builder->build_frame(ir_builder, addr, cmd));

@@ -67,6 +67,7 @@ static void example_ir_rx_task(void *arg)
 /**
  * @brief RMT Transmit Task
  *
+ * Not use in this project
  */
 static void example_ir_tx_task(void *arg)
 {

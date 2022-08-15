@@ -18,6 +18,7 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include "esp_err.h"
 
 #define IR_TOOLS_FLAGS_PROTO_EXT (1 << 0) /*!< Enable Extended IR protocol */

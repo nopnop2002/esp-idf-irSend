@@ -24,8 +24,8 @@ idf.py flash monitor
 # How to use
 
 Select IR code by ButtonB/C (Center/Right Button) press.   
-When a ButtonB is pressed for more than 2 seconds, it show first pages.   
-When a ButtonC is pressed for more than 2 seconds, it show last pages.   
+When a ButtonB is pressed for more than 2 seconds, it show last pages.   
+When a ButtonC is pressed for more than 2 seconds, it show first pages.   
 Fire IR code by ButtonA (Left Button) press.   
 
 ![Stack-2](https://user-images.githubusercontent.com/6020549/60749723-dfeb4180-9fd8-11e9-828f-8b58d1c9fc59.JPG)

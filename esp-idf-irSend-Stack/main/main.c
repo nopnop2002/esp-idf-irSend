@@ -47,13 +47,13 @@
 
 #if CONFIG_STACK
 #define SCREEN_WIDTH 320
-#define SCREEN_HEIGHT	240
+#define SCREEN_HEIGHT 240
 #define CS_GPIO 14
 #define DC_GPIO 27
 #define RESET_GPIO 33
 #define BL_GPIO 32
 #define FONT_WIDTH 12
-#define FONT_HEIGHT	24
+#define FONT_HEIGHT 24
 #define MAX_CONFIG 20
 #define MAX_LINE 8
 #define MAX_CHARACTER 26
@@ -74,16 +74,16 @@
 #define MAX_LINE 14
 #define MAX_CHARACTER 8
 #define GPIO_INPUT GPIO_NUM_35
-#define GPIO_BUZZER	GPIO_NUM_26
+#define GPIO_BUZZER GPIO_NUM_26
 #define RMT_TX_CHANNEL 1 /*!< RMT channel for transmitter */
 #define RMT_TX_GPIO_NUM	GPIO_NUM_17 /*!< GPIO number for transmitter signal */
 #endif
 
 #if CONFIG_STICKC
 #define SCREEN_WIDTH 80
-#define SCREEN_HEIGHT	160
+#define SCREEN_HEIGHT 160
 #define FONT_WIDTH 8
-#define FONT_HEIGHT	16
+#define FONT_HEIGHT 16
 #define MAX_CONFIG 20
 #define MAX_LINE 8
 #define MAX_CHARACTER 10
@@ -95,7 +95,7 @@
 
 #if CONFIG_STICKC_PLUS
 #define SCREEN_WIDTH 135
-#define SCREEN_HEIGHT	240
+#define SCREEN_HEIGHT 240
 #define MOSI_GPIO 15
 #define SCLK_GPIO 13
 #define CS_GPIO 5 
@@ -105,7 +105,7 @@
 #define OFFSETX 52
 #define OFFSETY 40
 #define FONT_WIDTH 8
-#define FONT_HEIGHT	16
+#define FONT_HEIGHT 16
 #define MAX_CONFIG 20
 #define MAX_LINE 8
 #define MAX_CHARACTER 16
@@ -119,7 +119,8 @@
 #define CMD_UP 100
 #define CMD_DOWN 200
 #define CMD_TOP 300
-#define CMD_SELECT 400
+#define CMD_BOTTOM 400
+#define CMD_SELECT 500
 
 QueueHandle_t xQueueCmd;
 
@@ -225,7 +226,6 @@ void buttonB(void *pvParameters)
 		int level = gpio_get_level(GPIO_INPUT_B);
 		if (level == 0) {
 			ESP_LOGI(pcTaskGetName(0), "Push Button");
-			cmdBuf.command = CMD_DOWN;
 			TickType_t startTick = xTaskGetTickCount();
 			while(1) {
 				level = gpio_get_level(GPIO_INPUT_B);
@@ -249,7 +249,6 @@ void buttonB(void *pvParameters)
 {
 	ESP_LOGI(pcTaskGetName(0), "Start");
 	CMD_t cmdBuf;
-	cmdBuf.command = CMD_DOWN;
 	cmdBuf.taskHandle = xTaskGetCurrentTaskHandle();
 
 	// set the GPIO as a input
@@ -260,11 +259,17 @@ void buttonB(void *pvParameters)
 		int level = gpio_get_level(GPIO_INPUT_B);
 		if (level == 0) {
 			ESP_LOGI(pcTaskGetName(0), "Push Button");
+			TickType_t startTick = xTaskGetTickCount();
 			while(1) {
 				level = gpio_get_level(GPIO_INPUT_B);
 				if (level == 1) break;
 				vTaskDelay(1);
 			}
+			TickType_t endTick = xTaskGetTickCount();
+			TickType_t diffTick = endTick-startTick;
+			ESP_LOGI(pcTaskGetName(0),"diffTick=%d",diffTick);
+			cmdBuf.command = CMD_DOWN;
+			if (diffTick > 100) cmdBuf.command = CMD_BOTTOM;
 			xQueueSend(xQueueCmd, &cmdBuf, 0);
 		}
 		vTaskDelay(1);
@@ -277,7 +282,6 @@ void buttonC(void *pvParameters)
 {
 	ESP_LOGI(pcTaskGetName(0), "Start");
 	CMD_t cmdBuf;
-	cmdBuf.command = CMD_UP;
 	cmdBuf.taskHandle = xTaskGetCurrentTaskHandle();
 
 	// set the GPIO as a input
@@ -288,11 +292,17 @@ void buttonC(void *pvParameters)
 		int level = gpio_get_level(GPIO_INPUT_C);
 		if (level == 0) {
 			ESP_LOGI(pcTaskGetName(0), "Push Button");
+			TickType_t startTick = xTaskGetTickCount();
 			while(1) {
 				level = gpio_get_level(GPIO_INPUT_C);
 				if (level == 1) break;
 				vTaskDelay(1);
 			}
+			TickType_t endTick = xTaskGetTickCount();
+			TickType_t diffTick = endTick-startTick;
+			ESP_LOGI(pcTaskGetName(0),"diffTick=%d",diffTick);
+			cmdBuf.command = CMD_UP;
+			if (diffTick > 100) cmdBuf.command = CMD_TOP;
 			xQueueSend(xQueueCmd, &cmdBuf, 0);
 		}
 		vTaskDelay(1);
@@ -479,7 +489,6 @@ void tft(void *pvParameters)
 		ascii[0] = 0;
 		if (display[i+offset].enable) strcpy((char *)ascii, display[i+offset].display_text);
 		if (i == 0) {
-			//lcdDrawString(&dev, fxM, 0, ypos, ascii, YELLOW);
 			lcdDrawString(&dev, fxG, 0, ypos, ascii, YELLOW);
 		} else {
 			lcdDrawString(&dev, fxG, 0, ypos, ascii, CYAN);
@@ -497,7 +506,6 @@ void tft(void *pvParameters)
 
 			ypos = FONT_HEIGHT * (selected+3) - 1;
 			strcpy((char *)ascii, display[selected+offset].display_text);
-			//lcdDrawString(&dev, fxM, 0, ypos, ascii, BLACK);
 			lcdDrawString(&dev, fxG, 0, ypos, ascii, CYAN);
 
 			// Scroll Down
@@ -525,7 +533,6 @@ void tft(void *pvParameters)
 
 			ypos = FONT_HEIGHT * (selected+3) - 1;
 			strcpy((char *)ascii, display[selected+offset].display_text);
-			//lcdDrawString(&dev, fxM, 0, ypos, ascii, BLACK);
 			lcdDrawString(&dev, fxG, 0, ypos, ascii, CYAN);
 
 			// Scroll Up
@@ -555,7 +562,29 @@ void tft(void *pvParameters)
 				ascii[0] = 0;
 				if (display[i+offset].enable) strcpy((char *)ascii, display[i+offset].display_text);
 				if (i == 0) {
-					lcdDrawString(&dev, fxM, 0, ypos, ascii, YELLOW);
+					lcdDrawString(&dev, fxG, 0, ypos, ascii, YELLOW);
+				} else {
+					lcdDrawString(&dev, fxG, 0, ypos, ascii, CYAN);
+				}
+			}
+
+		} else if (cmdBuf.command == CMD_BOTTOM) {
+			ESP_LOGI(pcTaskGetName(0), "readLine=%d MAX_LINE=%d",readLine, MAX_LINE );
+			offset = 0;
+			selected = readLine-1;
+			if (readLine > MAX_LINE) {
+				offset = readLine - MAX_LINE;
+				selected = MAX_LINE - 1;
+			}
+			ESP_LOGI(pcTaskGetName(0), "selected=%d offset=%d",selected, offset);
+			lcdDrawFillRect(&dev, 0, FONT_HEIGHT-1, SCREEN_WIDTH-1, SCREEN_HEIGHT-1, BLACK);
+			for(int i=0;i<MAX_LINE;i++) {
+				ypos = FONT_HEIGHT * (i+3) - 1;
+				ascii[0] = 0;
+				if (display[i+offset].enable) strcpy((char *)ascii, display[i+offset].display_text);
+				//if (i == 0) {
+				if (i+offset+1 == readLine) {
+					lcdDrawString(&dev, fxG, 0, ypos, ascii, YELLOW);
 				} else {
 					lcdDrawString(&dev, fxG, 0, ypos, ascii, CYAN);
 				}

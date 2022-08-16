@@ -3,7 +3,7 @@ M5Stick and M5StickC(+) have internal IR Transmitter.
 You can use these as Remote control transmitter.   
 
 # Software requirements
-esp-idf v4.4.   
+ESP-IDF V4.4.   
 This is because the specifications of the RMT driver have changed significantly with ESP-IDF V5.   
 
 # How to get IR code.

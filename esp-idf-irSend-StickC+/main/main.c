@@ -107,7 +107,7 @@
 #define FONT_WIDTH 8
 #define FONT_HEIGHT 16
 #define MAX_CONFIG 20
-#define MAX_LINE 8
+#define MAX_LINE 12
 #define MAX_CHARACTER 16
 #define GPIO_INPUT_A GPIO_NUM_37
 #define GPIO_INPUT_B GPIO_NUM_39

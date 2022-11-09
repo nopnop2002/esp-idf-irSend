@@ -5,10 +5,11 @@ You can use these as Remote control transmitter.
 # Software requirements
 ESP-IDF V4.4.   
 This is because the specifications of the RMT driver have changed significantly with ESP-IDF V5.   
-ESP-IDF V5 gives this warning, but work.   
+ESP-IDF V5.0 gives this warning, but work.   
 ```
 #warning "The legacy RMT driver is deprecated, please use driver/rmt_tx.h and/or driver/rmt_rx.h"
 ```
+Presumably, ESP-IDF V5.1 will completely obsolete the legacy RMT driver.   
 
 
 # How to get IR code.

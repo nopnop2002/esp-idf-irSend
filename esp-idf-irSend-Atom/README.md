@@ -18,7 +18,7 @@ __You need to specify Baud rate for flashing.__
 
 M5Atom only has one button.    
 There is no display.    
-Pressing the button fires lines 1 and 2 of Display.def in the font directory alternately.   
+Pressing the button will alternately fire the signals on lines 1 and 2 of Display.def in the font directory.    
 ```
 Play,0x18,0x00;	cmd:0xe718 addr:0xff00
 Stop,0x1C,0x00;	cmd:0xe31c addr:0xff00

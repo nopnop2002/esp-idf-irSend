@@ -6,7 +6,9 @@
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
    CONDITIONS OF ANY KIND, either express or implied.
 */
+
 #include <stdio.h>
+#include <inttypes.h>
 #include <string.h>
 #include "sdkconfig.h"
 #include "freertos/FreeRTOS.h"
@@ -51,7 +53,7 @@ static void example_ir_rx_task(void *arg)
             length /= 4; // one RMT = 4 Bytes
             if (ir_parser->input(ir_parser, items, length) == ESP_OK) {
                 if (ir_parser->get_scan_code(ir_parser, &addr, &cmd, &repeat) == ESP_OK) {
-                    ESP_LOGI(TAG, "Scan Code %s --- addr: 0x%04x cmd: 0x%04x", repeat ? "(repeat)" : "", addr, cmd);
+                    ESP_LOGI(TAG, "Scan Code %s --- addr: 0x%04"PRIx32" cmd: 0x%04"PRIx32, repeat ? "(repeat)" : "", addr, cmd);
                 }
             }
             //after parsing the data, return spaces to ringbuffer.

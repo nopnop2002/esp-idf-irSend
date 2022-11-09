@@ -1,5 +1,5 @@
 # esp-idf-irSend
-M5Stick and M5StickC(+) have internal IR Transmitter.   
+M5Atom, M5Stick and M5StickC(+) have internal IR Transmitter.   
 You can use these as Remote control transmitter.   
 
 # Software requirements
@@ -22,20 +22,33 @@ idf.py menuconfig
 idf.py flash monitor
 ```
 
-You need to connect a IR receiver to GPIO19.   
+Connect the IR receiver to GPIO19.   
+I used the TL1838, but you can use anything as long as it is powered by 3.3V.   
 IR transmitter don't use.   
 When changing GPIO19, you can change it to any GPIO using menuconfig.   
+
+```
+ IR Receiver (TL1838)                 ESP Board
++--------------------+       +-------------------+
+|                  RX+-------+GPIO19             |
+|                    |       |                   |
+|                 3V3+-------+3V3                |
+|                    |       |                   |
+|                 GND+-------+GND                |
++--------------------+       +-------------------+
+```
 
 Build the project and flash it to the board, then run monitor tool to view serial output.   
 When you press a button of the remote control, you will find there output:   
 ```
-I (3513574) NEC: RMT RCV --- addr: 0xff00 cmd: 0xe718
+I (86070) main: Scan Code  --- addr: 0xff00 cmd: 0xe718
+I (86120) main: Scan Code (repeat) --- addr: 0xff00 cmd: 0xe718
 ```
 addr and cmd is displayed as below:   
 addr: 0xff00 --> {0xff-addr} << 8 + addr   
 cmd: 0xe718 --> {0xff-cmd} << 8 + cmd   
 
-addr is 0x00 , and cmd is 0x18.
+This shows addr as 0x00 and cmd as 0x18.
 
 **Note:**   
 You can get only NEC format IR code using this.   

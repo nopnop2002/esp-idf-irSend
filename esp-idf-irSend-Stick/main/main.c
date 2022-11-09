@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -173,7 +174,7 @@ void buttonStick(void *pvParameters)
 			}
 			TickType_t endTick = xTaskGetTickCount();
 			TickType_t diffTick = endTick-startTick;
-			ESP_LOGI(pcTaskGetName(0),"diffTick=%d",diffTick);
+			ESP_LOGI(pcTaskGetName(0),"diffTick=%"PRIu32, diffTick);
 			cmdBuf.command = CMD_DOWN;
 			if (diffTick > 100) cmdBuf.command = CMD_SELECT;
 			xQueueSend(xQueueCmd, &cmdBuf, 0);
@@ -234,7 +235,7 @@ void buttonB(void *pvParameters)
 			}
 			TickType_t endTick = xTaskGetTickCount();
 			TickType_t diffTick = endTick-startTick;
-			ESP_LOGI(pcTaskGetName(0),"diffTick=%d",diffTick);
+			ESP_LOGI(pcTaskGetName(0),"diffTick=%"PRIu32, diffTick);
 			cmdBuf.command = CMD_DOWN;
 			if (diffTick > 100) cmdBuf.command = CMD_TOP;
 			xQueueSend(xQueueCmd, &cmdBuf, 0);
@@ -267,7 +268,7 @@ void buttonB(void *pvParameters)
 			}
 			TickType_t endTick = xTaskGetTickCount();
 			TickType_t diffTick = endTick-startTick;
-			ESP_LOGI(pcTaskGetName(0),"diffTick=%d",diffTick);
+			ESP_LOGI(pcTaskGetName(0),"diffTick=%"PRIu32, diffTick);
 			cmdBuf.command = CMD_DOWN;
 			if (diffTick > 100) cmdBuf.command = CMD_BOTTOM;
 			xQueueSend(xQueueCmd, &cmdBuf, 0);
@@ -300,7 +301,7 @@ void buttonC(void *pvParameters)
 			}
 			TickType_t endTick = xTaskGetTickCount();
 			TickType_t diffTick = endTick-startTick;
-			ESP_LOGI(pcTaskGetName(0),"diffTick=%d",diffTick);
+			ESP_LOGI(pcTaskGetName(0),"diffTick=%"PRIu32, diffTick);
 			cmdBuf.command = CMD_UP;
 			if (diffTick > 100) cmdBuf.command = CMD_TOP;
 			xQueueSend(xQueueCmd, &cmdBuf, 0);

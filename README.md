@@ -28,7 +28,7 @@ IR transmitter don't use.
 When changing GPIO19, you can change it to any GPIO using menuconfig.   
 
 ```
- IR Receiver (TL1838)                 ESP Board
+ IR Receiver (TL1838)               ESP Board
 +--------------------+       +-------------------+
 |                  RX+-------+GPIO19             |
 |                    |       |                   |

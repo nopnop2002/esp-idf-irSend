@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <inttypes.h>
 #include <string.h>
 #include <math.h>
 
@@ -29,18 +31,18 @@ void spi_master_init(TFT_t * dev, int16_t GPIO_CS, int16_t GPIO_DC, int16_t GPIO
 	esp_err_t ret;
 
 	ESP_LOGI(TAG, "GPIO_CS=%d",GPIO_CS);
-	gpio_pad_select_gpio( GPIO_CS );
+	gpio_reset_pin( GPIO_CS );
 	gpio_set_direction( GPIO_CS, GPIO_MODE_OUTPUT );
 	gpio_set_level( GPIO_CS, 0 );
 
 	ESP_LOGI(TAG, "GPIO_DC=%d",GPIO_DC);
-	gpio_pad_select_gpio( GPIO_DC );
+	gpio_reset_pin( GPIO_DC );
 	gpio_set_direction( GPIO_DC, GPIO_MODE_OUTPUT );
 	gpio_set_level( GPIO_DC, 0 );
 
 	ESP_LOGI(TAG, "GPIO_RESET=%d",GPIO_RESET);
 	if ( GPIO_RESET >= 0 ) {
-		gpio_pad_select_gpio( GPIO_RESET );
+		gpio_reset_pin( GPIO_RESET );
 		gpio_set_direction( GPIO_RESET, GPIO_MODE_OUTPUT );
 		gpio_set_level( GPIO_RESET, 0 );
 		vTaskDelay( pdMS_TO_TICKS( 100 ) );
@@ -49,7 +51,7 @@ void spi_master_init(TFT_t * dev, int16_t GPIO_CS, int16_t GPIO_DC, int16_t GPIO
 
 	ESP_LOGI(TAG, "GPIO_BL=%d",GPIO_BL);
 	if ( GPIO_BL >= 0 ) {
-		gpio_pad_select_gpio( GPIO_BL );
+		gpio_reset_pin( GPIO_BL );
 		gpio_set_direction( GPIO_BL, GPIO_MODE_OUTPUT );
 		gpio_set_level( GPIO_BL, 0 );
 	}
@@ -166,7 +168,7 @@ bool spi_master_write_color(TFT_t * dev, uint16_t color, uint16_t size)
 void delayMS(int ms) {
 	int _ms = ms + (portTICK_PERIOD_MS - 1);
 	TickType_t xTicksToDelay = _ms / portTICK_PERIOD_MS;
-	ESP_LOGD(TAG, "ms=%d _ms=%d portTICK_PERIOD_MS=%d xTicksToDelay=%d",ms,_ms,portTICK_PERIOD_MS,xTicksToDelay);
+	ESP_LOGD(TAG, "ms=%d _ms=%d portTICK_PERIOD_MS=%"PRIu32" xTicksToDelay=%"PRIu32,ms,_ms,portTICK_PERIOD_MS,xTicksToDelay);
 	vTaskDelay(xTicksToDelay);
 }
 

@@ -3,15 +3,16 @@ M5Atom, M5Stick and M5StickC(+) have internal IR Transmitter.
 You can use these as Remote control transmitter.   
 
 # Software requirements
-ESP-IDF V4.4.   
-This is because the specifications of the RMT driver have changed significantly with ESP-IDF V5.   
+esp-idf v4.4/v5.0.   
 
-__Note for ESP-IDF V5.0__   
-ESP-IDF V5.0 gives this warning, but work.   
+__Note for esp-idf v5.0__   
+esp-idf v5.0 gives this warning, but work.   
+
 ```
 #warning "The legacy RMT driver is deprecated, please use driver/rmt_tx.h and/or driver/rmt_rx.h"
 ```
-Presumably, ESP-IDF V5.1 will completely obsolete the legacy RMT driver.   
+This is because the specifications of the RMT driver have changed significantly with esp-idf v5.   
+Presumably, esp-idf v5.1 will completely obsolete the legacy RMT driver.   
 
 
 # How to get IR code.

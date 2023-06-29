@@ -81,5 +81,5 @@ Each line terminated by semicolon.
 
 # NEC IR Code Specification
 
-![NEC-IR-SPEC](https://user-images.githubusercontent.com/6020549/59671633-f7fd4b80-91f8-11e9-9bc6-45ab6e18ebc8.jpg)
+[NEC-IR-SPEC](https://user-images.githubusercontent.com/6020549/59671633-f7fd4b80-91f8-11e9-9bc6-45ab6e18ebc8.jpg)
 

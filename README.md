@@ -12,7 +12,6 @@ esp-idf v5.0 gives this warning, but work.
 #warning "The legacy RMT driver is deprecated, please use driver/rmt_tx.h and/or driver/rmt_rx.h"
 ```
 This is because the specifications of the RMT driver have changed significantly with esp-idf v5.   
-Presumably, esp-idf v5.1 will completely obsolete the legacy RMT driver.   
 
 
 # How to get IR code.

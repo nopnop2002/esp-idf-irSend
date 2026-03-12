@@ -12,14 +12,14 @@
 #define	SCL_AXP192	22
 #define I2C_TICKS_TO_WAIT 100 // Maximum ticks to wait before issuing a timeout
 
-static i2c_master_bus_handle_t bus_handle;
-static i2c_master_dev_handle_t dev_handle;
+static i2c_master_bus_handle_t _bus_handle;
+static i2c_master_dev_handle_t _dev_handle;
 
 uint8_t i2c_master_read(uint8_t reg) {
 	uint8_t in_buf[1];
 	uint8_t out_buf[1];
 	out_buf[0] = reg;
-	ESP_ERROR_CHECK(i2c_master_transmit_receive(dev_handle, out_buf, 1, in_buf, 1, I2C_TICKS_TO_WAIT));
+	ESP_ERROR_CHECK(i2c_master_transmit_receive(_dev_handle, out_buf, 1, in_buf, 1, I2C_TICKS_TO_WAIT));
 	return in_buf[0];
 }
 
@@ -27,7 +27,7 @@ void i2c_master_write(uint8_t reg, uint8_t data) {
 	uint8_t out_buf[2];
 	out_buf[0] = reg;
 	out_buf[1] = data;
-	ESP_ERROR_CHECK(i2c_master_transmit(dev_handle, out_buf, 2, I2C_TICKS_TO_WAIT));
+	ESP_ERROR_CHECK(i2c_master_transmit(_dev_handle, out_buf, 2, I2C_TICKS_TO_WAIT));
 }
 
 void AXP192_Initialize(i2c_port_num_t port)
@@ -40,14 +40,24 @@ void AXP192_Initialize(i2c_port_num_t port)
 	i2c_mst_config.sda_io_num = (gpio_num_t)SDA_AXP192;
 	i2c_mst_config.flags.enable_internal_pullup = true;
 
-	ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_mst_config, &bus_handle));
+	ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_mst_config, &_bus_handle));
 
 	i2c_device_config_t dev_cfg = {};
 	dev_cfg.dev_addr_length = I2C_ADDR_BIT_LEN_7;
 	dev_cfg.device_address = I2C_AXP192;
 	dev_cfg.scl_speed_hz = 1000000;
 
-	ESP_ERROR_CHECK(i2c_master_bus_add_device(bus_handle, &dev_cfg, &dev_handle));
+	ESP_ERROR_CHECK(i2c_master_bus_add_device(_bus_handle, &dev_cfg, &_dev_handle));
+}
+
+void AXP192_AddDevice(i2c_master_bus_handle_t bus_handle, uint16_t devAddr)
+{
+	i2c_device_config_t dev_cfg = {};
+	dev_cfg.dev_addr_length = I2C_ADDR_BIT_LEN_7;
+	dev_cfg.device_address = devAddr;
+	dev_cfg.scl_speed_hz = 1000000;
+
+	ESP_ERROR_CHECK(i2c_master_bus_add_device(bus_handle, &dev_cfg, &_dev_handle));
 }
 
 // Power On
